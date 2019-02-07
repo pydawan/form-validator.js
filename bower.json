@@ -1,0 +1,28 @@
+{
+  "name": "form-validator",
+  "authors": [
+    "Thiago Alexandre <thicmp@gmail.com>"
+  ],
+  "description": "Um simples validador de formulários escrito em JavaScript.",
+  "main": "index.html",
+  "keywords": [
+    "form",
+    "validation",
+    "javascript",
+    "html",
+    "css",
+    "bower"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "jquery": "3.3.1"
+  }
+}

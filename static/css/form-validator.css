@@ -1,0 +1,25 @@
+/**
+* @author thiago-amm
+* @version v1.0.0 04/02/2019
+* @since v1.0.0
+*/
+
+label.invalid,
+span.invalid {
+    color: red;
+}
+
+input.invalid {
+    border: 1px solid red;
+    /*color: red;*/
+}
+
+label.valid,
+span.valid {
+    color: green;
+}
+
+input.valid {
+    border: 1px solid green;
+    color: inherit;
+}
