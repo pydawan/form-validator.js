@@ -1,21 +1,9 @@
 /**
  * Simples Validador de Formulários escrito em JavaScript.
- *
  * @author thiago-amm
  * @version v1.0.0 04/02/2019
  * @since v1.0.0
  */
-
- // 1. Verificar se as configurações do validador de formulário foram informadas.
- // 2. Armazenar o seletor do formulário.
- // 3. Obter e armazenar todos os campos do formulário em um mapa.
- // 4. Criar um mapa para cada campo do formulário.
- // 4.1 No mapa do campo deverá armazenar o tipo de validação, os eventos que irão dispará-la e a mensagem de validação.
- // 5. A validação do formulário (todos os campos) deve ocorrer em dois momentos:
- // 5.1 quando o usuário clicar no botão submit do formulário.
- // 5.2 quando o campo com o qual o usuário estiver interagindo possuir registrados uma validação e um evento e o mesmo
- //     disparar o evento registrado.
- // 5.2.1 nesse caso todo o formulário deverá ser validado.
 
 function test(condition, failMessage) {
   if (!condition) {
@@ -24,56 +12,58 @@ function test(condition, failMessage) {
 }
 
 function ValidationError(field, message) {
-  var validationError = null;
+  var error = null;
   this.field = field ? field : null;
   this.message = message ? message : "";
   if (field) {
-    validationError = {
+    error = {
       field: field,
       message: message
     };
   }
-  validationError;
-}
-
-function ValidationResult(field, valid) {
-  var validationResult = null;
-  if (field) {
-    validationResult = {};
-    validationResult.field = field;
-    validationResult.valid = valid;
-  }
-  return validationResult;
+  return error;
 }
 
 ValidationError.prototype.toString = function() {
   return "ValidationError: " + $(this.field).attr("id") + " " + this.message;
 };
 
+function ValidationResult(field, status) {
+  var result = null;
+  if (field) {
+    result = {};
+    result.field = field;
+    result.status = status;
+  }
+  return result;
+}
+
 function RequiredFieldValidation(field, message) {
   var validationError = null;
   var validationResult = null;
   if (field) {
-    var id = $(field).attr("id");
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
     message = message
       ? message
-      : id + " é um campo de preenchimento obrigatório!";
-    $("#" + id + "-error-message").remove();
+      : fieldId + " é um campo de preenchimento obrigatório!";
+    $("#" + fieldMessageId).remove();
     try {
       test($(field).val(), message);
       $(field).removeClass("invalid");
-      $('label[for="' + id + '"]').removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
       validationResult = new ValidationResult(field, true);
     } catch (error) {
       $(field).addClass("invalid");
-      $('label[for="' + id + '"]').addClass("invalid");
-      $(field).after(
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage =
         '<span id="' +
-          id +
-          '-error-message" class="invalid">&nbsp;' +
-          message +
-          "</span>"
-      );
+        fieldMessageId +
+        '" class="invalid">&nbsp;' +
+        message +
+        "</span>";
+      $(field).after(validationMessage);
       validationResult = new ValidationResult(field, false);
       validationError = new ValidationError(field, error);
     }
@@ -86,53 +76,49 @@ function RequiredFieldValidation(field, message) {
   };
 }
 
-/*
-var requiredFieldValidation = function(field, message) {
-  return new RequiredFieldValidation(field, message);
-};
-*/
-
 function PatternFieldValidation(field, pattern, message) {
   var validationError = null;
   var validationResult = null;
   field = field ? field : null;
   pattern = pattern && pattern instanceof RegExp ? pattern : null;
-  message = message
-    ? message
-    : $(field).attr("id") + " não corresponde ao padrão " + pattern + "!";
   if (field && pattern) {
-    // Verifica se algum valor foi informado.
-    // Caso não tenha sido trata-se de uma validação required.
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message
+      ? message
+      : fieldId + " não corresponde ao padrão " + pattern + "!";
+    // 1. Verificar se algum valor foi informado para ser comparado com o padrão textual.
+    // 1.1 Caso não tenha sido informado um valor trata-se de uma validação required.
     if ($(field).val() !== "") {
       var expected = true;
       var obtained = pattern.test($(field).val());
-      var id = $(field).attr("id");
-      $("#" + id + "-error-message").remove();
+      $("#" + fieldMessageId).remove();
       try {
         test(obtained === expected, message);
         $(field).removeClass("invalid");
-        $('label[for="' + id + '"]').removeClass("invalid");
+        $(fieldLabelId).removeClass("invalid");
         validationResult = new ValidationResult(field, true);
       } catch (error) {
         $(field).addClass("invalid");
-        $('label[for="' + id + '"]').addClass("invalid");
-        $(field).after(
+        $(fieldLabelId).addClass("invalid");
+        var validationMessage =
           '<span id="' +
-            id +
-            '-error-message" class="invalid">&nbsp;' +
-            message +
-            "</span>"
-        );
+          fieldMessageId +
+          '" class="invalid">&nbsp;' +
+          message +
+          "</span>";
+        $(field).after(validationMessage);
         validationResult = new ValidationResult(field, false);
         validationError = new ValidationError(field, error);
       }
     }
   } else {
     if (!field) {
-      throw "field não informado!";
+      throw "Nenhum field informado!";
     }
     if (!pattern) {
-      throw "pattern não informado!";
+      throw "Nenhum pattern informado!";
     }
   }
   this.error = function() {
@@ -143,145 +129,132 @@ function PatternFieldValidation(field, pattern, message) {
   };
 }
 
-/*
-var patternFieldValidation = function(field, pattern, message) {
-  return new PatternFieldValidation(field, pattern, message);
-};
-*/
-
 function FormValidator(settings) {
-  var _settings = settings && settings instanceof Object ? settings : null;
-  var _form;
-  var _validations = [];
-  var _self = this;
-  _self.validationResults = {};
-  _self.fields = [];
-  _self.valid = false;
-  if (_settings) {
-    for (var setting in settings) {
-      if (setting === "form") {
-        _form = "#" + settings["form"];
-        _self.form = "" + _form;
+  var self = this;
+  self.settings = null;
+  self.form = null;
+  self.formFieldRules = [];
+  self.validForm = false;
+  var setting = null;
+  var rule = null;
+  var formFieldRule = null;
+  var formFieldRules = [];
+  var formFieldValidation = null;
+  var formFieldValidationEvents = null;
+  var formFieldValidationEvent = null;
+  var formValidationFieldsEvents = [];
+  var formValidationFieldEvents = null;
+  if (settings && settings instanceof Object) {
+    for (var i in settings) {
+      setting = settings[i] ? settings[i] : null;
+      if (setting) {
+        if (i === "form" && typeof(setting) === "string") {
+          self.form = "#" + settings["form"];
+        } else {
+          // TODO - lançar exceção avisando que a propriedade não é uma string.
+        }
+        if (i === "rules" && setting instanceof Object) {
+          for (var j in setting) {
+            // j é o field do form.
+            rule = setting[j] ? setting[j] : null;
+            if (rule) {
+              formFieldRule = {};
+              formFieldRule[j] = {};
+              for (var k in rule) {
+                formFieldValidation = rule[k] ? rule[k] : null;
+                if (formFieldValidation) {
+                  formFieldRule[j][k] = formFieldValidation;
+                  for (var formFieldValidationSetting in formFieldValidation) {
+                    if (formFieldValidationSetting === "events") {
+                      if (formFieldValidation["events"] && formFieldValidation["events"] instanceof Array) {
+                        formFieldValidationEvents = formFieldValidation["events"];
+                        if (formFieldValidationEvents.length > 0) {
+                          var field = j;
+                          var events = ("" + formFieldValidationEvents).replace(/,/g, " ");
+                          if (events) {
+                           (function(field, events) {
+                            $(document).on(events, field, function(event) {
+                              self.validate();
+                            });
+                           })("#" + field, "" + events);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              if (self.formFieldRules.indexOf(formFieldRule) === -1) {
+                self.formFieldRules.push(formFieldRule);
+              }
+            }
+          }
+        }
       }
-      if (setting === "rules") {
-        if (settings["rules"] && settings["rules"] instanceof Object) {
-          var rules = settings["rules"];
-          for (var i in rules) {
-            var rule = rules[i];
-            var fieldName = i;
-            var field = _form + " #" + fieldName;
-            _self.validationResults["" + field] = { valid: false };
-            if (rule && rule instanceof Object) {
-              for (var validation in rule) {
-                if (rule[validation] && rule[validation] instanceof Object) {
-                  var validationObject = rule[validation];
-                  var value;
-                  var message;
-                  if ("value" in validationObject) {
-                    value = validationObject["value"]
-                      ? validationObject["value"]
-                      : null;
-                  }
-                  if ("message" in validationObject) {
-                    message =
-                      validationObject["message"] &&
-                      typeof validationObject["message"] === "string"
-                        ? validationObject["message"]
-                        : "";
-                  }
-                  if ("events" in validationObject) {
-                    var events =
-                      validationObject["events"] &&
-                      validationObject["events"] instanceof Array
-                        ? validationObject["events"]
-                        : null;
-                    if (events) {
-                      var events = validationObject["events"];
-                      events = ("" + events).replace(/,/g, " ");
-                    }
-                  }
-                  if (validation === "required") {
-                    if (value === true) {
-                      if (events && field && message) {
-                        (function(events, field, message) {
-                          $(document).on(events, field, function(event) {
-                            var requiredFieldValidation = new RequiredFieldValidation(
-                              field,
-                              message
-                            );
-                            var validationResult = requiredFieldValidation.result();
-                            if (validationResult) {
-                              _self.validationResults[field]["valid"] =
-                                validationResult.valid;
-                              if (validationResult.valid === false) {
-                                _self.valid = false;
-                                $(_self.form)
-                                  .find("input:submit")
-                                  .attr("disabled", "disabled");
-                              }
-                            } else {
-                              _self.valid = false;
-                              _self.validationResults[field]["valid"] = false;
-                              $(_self.form)
-                                .find("input:submit")
-                                .attr("disabled", "disabled");
-                            }
-                          });
-                        })(events, field, message);
-                        _validations.push(
-                          (function(field, message) {
-                            return function() {
-                              return new RequiredFieldValidation(
-                                field,
-                                message
-                              );
-                            };
-                          })(field, message)
-                        );
+    }
+  } else {
+    throw "A configuração do validador de formulário não foi informada!";
+  }
+  this.enableSubmitButton = function() {
+    $(self.form).find("input:submit").removeAttr("disabled");
+  };
+  this.disableSubmitButton = function() {
+    $(self.form).find("input:submit").attr("disabled", "disabled");
+  };
+  this.validate = function() {
+    self.form = self.form && typeof(self.form) === "string" ? self.form : null;
+    self.formValidations = self.formValidations && self.formValidations instanceof Object ? self.formValidations : null;
+    var formFieldRule = null;
+    var formField = null;
+    var requiredFieldValidation = null;
+    var patternFieldValidation = null;
+    var $field = null;
+    var validationResults = [];
+    for (var rule in self.formFieldRules) {
+      formFieldRule = self.formFieldRules[rule] ? self.formFieldRules[rule] : null;
+      if (formFieldRule && formFieldRule instanceof Object) {
+        for (var field in formFieldRule) {
+          formField = field;
+          $field = $(self.form + " #" + field);
+          var formFieldValidation = formFieldRule[field] ? formFieldRule[field] : null;
+          if (formFieldValidation && formFieldValidation instanceof Object) {
+            for (var validation in formFieldValidation) {
+              var formFieldValidationSettings = formFieldValidation[validation] ? formFieldValidation[validation] : null;
+              if (formFieldValidationSettings && formFieldValidationSettings instanceof Object) {
+                var formFieldValidationEvents = null;
+                var formFieldValidationEvent = null;
+                var formFieldValidationValue = null;
+                var formFieldValidationMessage = null;
+                for (var setting in formFieldValidationSettings) {
+                  var formFieldValidationSetting = formFieldValidationSettings[setting] ? formFieldValidationSettings[setting] : null;
+                  var formFieldValidationResult = null;
+                  if (formFieldValidationSetting) {
+                    if (setting === "events" && formFieldValidationSetting instanceof Array && formFieldValidationSetting.length > 0) {
+                      formFieldValidationEvents = formFieldValidationSetting;
+                      for (var event in formFieldValidationEvents) {
+                        formFieldValidationEvent = formFieldValidationEvents[event] ? formFieldValidationEvents[event] : null;
                       }
                     }
-                  }
-                  if (validation === "pattern") {
-                    if (field && value && events && message) {
-                      if (value instanceof RegExp) {
-                        (function(events, field, pattern, message) {
-                          $(document).on(events, field, function(event) {
-                            var patternFieldValidation = new PatternFieldValidation(
-                              field,
-                              pattern,
-                              message
-                            );
-                            var validationResult = patternFieldValidation.result();
-                            if (validationResult) {
-                              _self.validationResults[field]["valid"] =
-                                validationResult.valid;
-                              if (validationResult === false) {
-                                _self.valid = false;
-                                $(_self.form)
-                                  .find("input:submit")
-                                  .attr("disabled", "disabled");
-                              }
-                            } else {
-                              _self.valid = false;
-                              $(_self.form)
-                                .find("input:submit")
-                                .attr("disabled", "disabled");
-                              _self.validationResults[field]["valid"] = false;
-                            }
-                          });
-                        })(events, field, value, message);
-                        _validations.push(
-                          (function(field, pattern, message) {
-                            return function() {
-                              return new PatternFieldValidation(
-                                field,
-                                pattern,
-                                message
-                              );
-                            };
-                          })(field, value, message)
-                        );
+                    if (setting === "value") {
+                      formFieldValidationValue = formFieldValidationSetting;
+                    }
+                    if (setting === "message" && typeof(formFieldValidationSetting) === "string") {
+                      formFieldValidationMessage = formFieldValidationSetting;
+                    }
+                    if (validation === "required") {
+                      if (formFieldValidationValue && typeof(formFieldValidationValue) === "boolean") {
+                        requiredFieldValidation = new RequiredFieldValidation($field, formFieldValidationMessage);
+                        formFieldValidationResult = requiredFieldValidation.result();
                       }
+                    }
+                    if (validation === "pattern") {
+                      if (formFieldValidationValue && formFieldValidationValue instanceof RegExp) {
+                        patternFieldValidation = new PatternFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
+                        formFieldValidationResult = patternFieldValidation.result();
+                      }
+                    }
+                    if (formFieldValidationResult && "status" in formFieldValidationResult) {
+                      validationResults.push(formFieldValidationResult["status"]);
                     }
                   }
                 }
@@ -291,56 +264,16 @@ function FormValidator(settings) {
         }
       }
     }
-    _self.disableSubmit = function() {
-        if (_self.valid === false) {
-          $(_self.form).find("input:submit").attr("disabled", "disabeld");
-        }
-    };
-    _self.enableSubmit = function() {
-      if (_self.valid === true) {
-        $(_self.form).find("input:submit").removeAttr("disabled");
+    for (var i in validationResults) {
+      self.validForm = validationResults[i];
+      if (self.validForm === false) {
+        break;
       }
-    };
-    _self.validateForm = function() {
-      var error = null;
-      var result = null;
-      for (var _validation in _validations) {
-        console.log(_validation);
-        console.log(_validations[_validation]);
-      }
-    };
-    if (_form) {
-      $(_form).submit(function(event) {
-        _self.validateForm();
-        /*
-        var error = null;
-        var result = null;
-        for (var _validation in _validations) {
-          result = _validations[_validation]().result();
-          if (result) {
-            if (!result.valid) {
-              _self.valid = false;
-              $(_self.form)
-                .find("input:submit")
-                .attr("disabled", "disabled");
-            }
-          } else {
-            _self.valid = false;
-            $(_self.form)
-              .find("input:submit")
-              .attr("disabled", "disabled");
-          }
-        }
-        if (_self.valid === true) {
-          $(_self.form)
-            .find("input:submit")
-            .removeAttr("disabled");
-        }
-        */
-        event.preventDefault();
-      });
     }
-  } else {
-    throw "Não foram encontradas configurações para o validador de formulário!";
-  }
+    if (self.validForm === true) {
+      self.enableSubmitButton();
+    } else {
+      self.disableSubmitButton();
+    }
+  };
 }

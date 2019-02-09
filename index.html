@@ -37,21 +37,9 @@
     </form>
   </center>
   <script src="static/bower_components/jquery/dist/jquery.min.js"></script>
-  <!--<script src="static/js/form-validator.js"></script>-->
-  <script src="static/js/main.js"></script>
+  <script src="static/js/form-validator.js"></script>
   <script>
     $(document).ready(function () {
-      /*
-      var requiredFieldValidation = new RequiredFieldValidation($("#nome"), "Nome inválido!");
-      console.log(requiredFieldValidation);
-      console.log(requiredFieldValidation.error());
-      console.log(requiredFieldValidation.result());
-      var patternFieldValidation = new PatternFieldValidation($("cpf"), /\d{3}\.\d{3}\.\d{3}-\d{2}/,
-        "CPF inválido!");
-      console.log(patternFieldValidation);
-      console.log(patternFieldValidation.error());
-      console.log(patternFieldValidation.result());
-      */
       var formValidator = new FormValidator({
         form: "form",
         rules: {
@@ -76,7 +64,10 @@
           }
         }
       });
-      formValidator.validate();
+      $(formValidator.form).submit(function(event) {
+        formValidator.validate();
+        event.preventDefault();
+      });
     });
   </script>
 </body>
