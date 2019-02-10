@@ -62,10 +62,149 @@ function RequiredFieldValidation(field, message) {
         fieldMessageId +
         '" class="invalid">&nbsp;' +
         message +
-        "</span>";
+        '</span>';
       $(field).after(validationMessage);
       validationResult = new ValidationResult(field, false);
       validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function() {
+    return validationError;
+  };
+  this.result = function() {
+    return validationResult;
+  };
+}
+
+function LengthValidationValue(field, length, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    var minValue = null;
+    var maxValue = null;
+    if (length && length instanceof Object) {
+      if ("min" in length && length["min"] && typeof(length["min"] === "number")) {
+        minValue = length["min"];
+      } else if ("minimum" in length && length["minimum"] && typeof(length["minimum"] === "number")) {
+        minValue = length["minimum"];
+      } else {
+        minValue = null;
+      }
+      if ("max" in length && length["max"] && typeof(length["max"] === "number")) {
+        maxValue = length["max"];
+      } else if ("maximum" in length && length["maximum"] && typeof(length["maximum"] === "number")) {
+        maxValue = length["maximum"];
+      } else {
+        maxValue = null;
+      }
+    }
+  }
+  if (message === "") {
+    // Informou apenas min.
+    if (minValue && !maxValue) {
+      message = fieldId + " deve possuir no mínimo " + minValue + (minValue == 1 ? " caracter" : " caracteres") + "!";
+    }
+    // Informou apenas max.
+    if (maxValue && !minValue) {
+      message = fieldId + " deve possuir no máximo " + maxValue + (maxValue == 1 ? " caracter" : " caracteres") + "!";
+    }
+    // Informou min e max.
+    if (minValue && maxValue) {
+      message = fieldId + " deve possuir no mínimo " + minValue + (minValue == 1 ? " caracter" : " caracteres") + " e ";
+      message += "no máximo " + maxValue + (maxValue == 1 ? " caracter" : " caracteres") + "!";
+    }
+  }
+  if ($(field).val()) {
+    $("#" + fieldMessageId).remove();
+    try {
+      if (minValue && !maxValue) {
+        test($(field).val().length >= minValue, message);
+      } else if (maxValue && !minValue) {
+        test($(field).val().length <= maxValue, message);
+      } else if (minValue && maxValue) {
+        test( ($(field).val().length >= minValue) && ($(field).val().length <= maxValue), message );
+      } else {
+
+      }
+      $(field).removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
+      validationResult = new ValidationResult(field, true);
+    } catch (error) {
+      $(field).addClass("invalid");
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      $(field).after(validationMessage);
+      validationResult = new ValidationResult(field, false);
+      validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function() {
+    return validationError;
+  };
+  this.result = function() {
+    return validationResult;
+  };
+}
+
+function MinLengthFieldValidation(field, length, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " deve possuir no mínimo " + length + (length == 1 ? " caracter" : " caracteres") + "!";
+    if ($(field).val()) {
+      $("#" + fieldMessageId).remove();
+      try {
+        test($(field).val().length >= length, message);
+        $(field).removeClass("invalid");
+        $(fieldLabelId).removeClass("invalid");
+        validationResult = new ValidationResult(field, true);
+      } catch (error) {
+        $(field).addClass("invalid");
+        $(fieldLabelId).addClass("invalid");
+        var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+        $(field).after(validationMessage);
+        validationResult = new ValidationResult(field, false);
+        validationError = new ValidationError(field, error);
+      }
+    }
+  }
+  this.error = function() {
+    return validationError;
+  };
+  this.result = function() {
+    return validationResult;
+  };
+}
+
+function MaxLengthFieldValidation(field, length, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " deve possuir no máximo " + length + (length == 1 ? " caracter" : " caracteres") + "!";
+    if ($(field).val()) {
+      $("#" + fieldMessageId).remove();
+      try {
+        test($(field).val().length <= length, message);
+        $(field).removeClass("invalid");
+        $(fieldLabelId).removeClass("invalid");
+        validationResult = new ValidationResult(field, true);
+      } catch (error) {
+        $(field).addClass("invalid");
+        $(fieldLabelId).addClass("invalid");
+        var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+        $(field).after(validationMessage);
+        validationResult = new ValidationResult(field, false);
+        validationError = new ValidationError(field, error);
+      }
     }
   }
   this.error = function() {
@@ -107,7 +246,7 @@ function PatternFieldValidation(field, pattern, message) {
           fieldMessageId +
           '" class="invalid">&nbsp;' +
           message +
-          "</span>";
+          '</span>';
         $(field).after(validationMessage);
         validationResult = new ValidationResult(field, false);
         validationError = new ValidationError(field, error);
@@ -208,6 +347,13 @@ function FormValidator(settings) {
     var formField = null;
     var requiredFieldValidation = null;
     var patternFieldValidation = null;
+    var minLengthFieldValidation = null;
+    var maxLengthFieldValidation = null;
+    var lengthFieldValidation = null;
+    var formFieldValidationEvents = null;
+    var formFieldValidationEvent = null;
+    var formFieldValidationValue = null;
+    var formFieldValidationMessage = null;
     var $field = null;
     var validationResults = [];
     for (var rule in self.formFieldRules) {
@@ -221,10 +367,6 @@ function FormValidator(settings) {
             for (var validation in formFieldValidation) {
               var formFieldValidationSettings = formFieldValidation[validation] ? formFieldValidation[validation] : null;
               if (formFieldValidationSettings && formFieldValidationSettings instanceof Object) {
-                var formFieldValidationEvents = null;
-                var formFieldValidationEvent = null;
-                var formFieldValidationValue = null;
-                var formFieldValidationMessage = null;
                 for (var setting in formFieldValidationSettings) {
                   var formFieldValidationSetting = formFieldValidationSettings[setting] ? formFieldValidationSettings[setting] : null;
                   var formFieldValidationResult = null;
@@ -251,6 +393,24 @@ function FormValidator(settings) {
                       if (formFieldValidationValue && formFieldValidationValue instanceof RegExp) {
                         patternFieldValidation = new PatternFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
                         formFieldValidationResult = patternFieldValidation.result();
+                      }
+                    }
+                    if (validation === "minlength") {
+                      if (formFieldValidationValue && typeof(formFieldValidationValue) === "number") {
+                        minLengthFieldValidation = new MinLengthFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
+                        formFieldValidationResult = minLengthFieldValidation.result();
+                      }
+                    }
+                    if (validation === "maxlength") {
+                      if (formFieldValidationValue && typeof(formFieldValidationValue) === "number") {
+                        maxLengthFieldValidation = new MaxLengthFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
+                        formFieldValidationResult = maxLengthFieldValidation.result();
+                      }
+                    }
+                    if (validation === "length") {
+                      if (formFieldValidationValue && formFieldValidationValue instanceof Object) {
+                        lengthFieldValidation = new LengthValidationValue($field, formFieldValidationValue, formFieldValidationMessage);
+                        formFieldValidationResult = lengthFieldValidation.result();
                       }
                     }
                     if (formFieldValidationResult && "status" in formFieldValidationResult) {

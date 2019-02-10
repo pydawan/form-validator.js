@@ -24,8 +24,8 @@
             <td><input type="text" id="cpf" /></td>
           </tr>
           <tr>
-            <td><label>E-mail:</label></td>
-            <td><input type="text" /></td>
+            <td><label for="email">E-mail:</label></td>
+            <td><input type="text" id="email" /></td>
           </tr>
           <tr>
             <td colspan="2" align="right">
@@ -48,6 +48,11 @@
               value: true,
               events: ["blur"],
               message: "Nome é um campo de preenchimento obrigatório!"
+            },
+            minlength: {
+              value: 5,
+              events: ["keyup"],
+              message: "Nome deve ter no mínimo 5 caracteres!"
             }
           },
           cpf: {
@@ -60,6 +65,21 @@
               value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
               events: ["focus", "blur", "keyup"],
               message: "O CPF informado não corresponde ao padrão 999.999.999-99!"
+            }
+          },
+          email: {
+            required: {
+              value: true,
+              events: ["blur"],
+              message: "E-mail é um campo de preenchimento obrigatório!"
+            },
+            length: {
+              value: {
+                min: 5,
+                max: 10
+              },
+              events: ["keyup"],
+              message: "E-mail deve ter no mínimo 5 e no máximo 10 caracteres!"
             }
           }
         }
