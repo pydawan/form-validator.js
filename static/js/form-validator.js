@@ -76,7 +76,7 @@ function RequiredFieldValidation(field, message) {
   };
 }
 
-function LengthValidationValue(field, length, message) {
+function LengthFieldValidation(field, length, message) {
   var validationError = null;
   var validationResult = null;
   if (field) {
@@ -447,7 +447,7 @@ function FormValidator(settings) {
             }
           }
           if (fieldValidation === "minlength") {
-            if (typeof fieldValidationValue === "number") {
+            if (typeof(fieldValidationValue) === "number") {
               minLengthFieldValidation = new MinLengthFieldValidation(
                 field,
                 fieldValidationValue,
@@ -457,13 +457,19 @@ function FormValidator(settings) {
             }
           }
           if (fieldValidation === "maxlength") {
-            if (typeof fieldValidationValue === "number") {
+            if (typeof(fieldValidationValue) === "number") {
               maxLengthFieldValidation = new MaxLengthFieldValidation(
                 field,
                 fieldValidationValue,
                 fieldValidationMessage
               );
               validationResult = maxLengthFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "length") {
+            if (typeof(fieldValidationValue) === "object") {
+              lengthFieldValidation = new LengthFieldValidation(field, fieldValidationValue, fieldValidationMessage);
+              validationResult = lengthFieldValidation.result();
             }
           }
           if (validationResult.status === false) {
@@ -613,7 +619,7 @@ function FormValidator(settings) {
                         formFieldValidationValue &&
                         formFieldValidationValue instanceof Object
                       ) {
-                        lengthFieldValidation = new LengthValidationValue(
+                        lengthFieldValidation = new LengthFieldValidation(
                           $field,
                           formFieldValidationValue,
                           formFieldValidationMessage
