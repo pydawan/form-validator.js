@@ -349,6 +349,7 @@ function FormValidator(settings) {
   var formValidationFieldsEvents = [];
   var formValidationFieldEvents = null;
   if (settings && settings instanceof Object) {
+    self.settings = settings;
     for (var i in settings) {
       setting = settings[i] ? settings[i] : null;
       if (setting) {
@@ -385,7 +386,8 @@ function FormValidator(settings) {
                           if (events) {
                             (function(field, events) {
                               $(document).on(events, field, function(event) {
-                                self.validate();
+                                //self.validate();
+                                self.validateField(field);
                               });
                             })("#" + field, "" + events);
                           }
@@ -406,6 +408,75 @@ function FormValidator(settings) {
   } else {
     throw "A configuração do validador de formulário não foi informada!";
   }
+  this.validateField = function(field) {
+    if (field) {
+      var $field = $(field);
+      var fieldName = field.replace("#", "");
+      var fieldValidationSettings = self.settings["rules"][fieldName];
+      if (fieldValidationSettings) {
+        var fieldValidationSetting = null;
+        var fieldValidationValue = null;
+        var fieldValidationMessage = null;
+        var requiredFieldValidation = null;
+        var patternFieldValidation = null;
+        var minLengthFieldValidation = null;
+        var maxLengthFieldValidation = null;
+        var lengthFieldValidation = null;
+        var validationResult = null;
+        for (var fieldValidation in fieldValidationSettings) {
+          fieldValidationSetting = fieldValidationSettings[fieldValidation];
+          fieldValidationValue = fieldValidationSetting["value"];
+          fieldValidationMessage = fieldValidationSetting["message"];
+          if (fieldValidation === "required") {
+            if (fieldValidationValue === true) {
+              requiredFieldValidation = new RequiredFieldValidation(
+                field,
+                fieldValidationMessage
+              );
+              validationResult = requiredFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "pattern") {
+            if (fieldValidationValue instanceof RegExp) {
+              patternFieldValidation = new PatternFieldValidation(
+                field,
+                fieldValidationValue,
+                fieldValidationMessage
+              );
+              validationResult = patternFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "minlength") {
+            if (typeof fieldValidationValue === "number") {
+              minLengthFieldValidation = new MinLengthFieldValidation(
+                field,
+                fieldValidationValue,
+                fieldValidationMessage
+              );
+              validationResult = minLengthFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "maxlength") {
+            if (typeof fieldValidationValue === "number") {
+              maxLengthFieldValidation = new MaxLengthFieldValidation(
+                field,
+                fieldValidationValue,
+                fieldValidationMessage
+              );
+              validationResult = maxLengthFieldValidation.result();
+            }
+          }
+          if (validationResult.status === false) {
+            self.validForm = false;
+            this.disableSubmitButton();
+            return;
+          } else {
+            this.enableSubmitButton();
+          }
+        }
+      }
+    }
+  };
   this.enableSubmitButton = function() {
     $(self.form)
       .find("input:submit")
@@ -580,11 +651,15 @@ function FormValidator(settings) {
   };
   this.reset = function() {
     if (self.form) {
-        $(self.form).find(".invalid").each(function(i, e) {
-            $(e).removeClass("invalid");
+      $(self.form)
+        .find(".invalid")
+        .each(function(i, e) {
+          $(e).removeClass("invalid");
         });
-        $('span[id$="-error-message"]').remove();
-        $(self.form).find("input:submit").removeAttr("disabled");
+      $('span[id$="-error-message"]').remove();
+      $(self.form)
+        .find("input:submit")
+        .removeAttr("disabled");
     }
   };
 }
