@@ -62,7 +62,7 @@ function RequiredFieldValidation(field, message) {
         fieldMessageId +
         '" class="invalid">&nbsp;' +
         message +
-        '</span>';
+        "</span>";
       $(field).after(validationMessage);
       validationResult = new ValidationResult(field, false);
       validationError = new ValidationError(field, error);
@@ -86,16 +86,32 @@ function LengthValidationValue(field, length, message) {
     var minValue = null;
     var maxValue = null;
     if (length && length instanceof Object) {
-      if ("min" in length && length["min"] && typeof(length["min"] === "number")) {
+      if (
+        "min" in length &&
+        length["min"] &&
+        typeof (length["min"] === "number")
+      ) {
         minValue = length["min"];
-      } else if ("minimum" in length && length["minimum"] && typeof(length["minimum"] === "number")) {
+      } else if (
+        "minimum" in length &&
+        length["minimum"] &&
+        typeof (length["minimum"] === "number")
+      ) {
         minValue = length["minimum"];
       } else {
         minValue = null;
       }
-      if ("max" in length && length["max"] && typeof(length["max"] === "number")) {
+      if (
+        "max" in length &&
+        length["max"] &&
+        typeof (length["max"] === "number")
+      ) {
         maxValue = length["max"];
-      } else if ("maximum" in length && length["maximum"] && typeof(length["maximum"] === "number")) {
+      } else if (
+        "maximum" in length &&
+        length["maximum"] &&
+        typeof (length["maximum"] === "number")
+      ) {
         maxValue = length["maximum"];
       } else {
         maxValue = null;
@@ -105,16 +121,35 @@ function LengthValidationValue(field, length, message) {
   if (message === "") {
     // Informou apenas min.
     if (minValue && !maxValue) {
-      message = fieldId + " deve possuir no mínimo " + minValue + (minValue == 1 ? " caracter" : " caracteres") + "!";
+      message =
+        fieldId +
+        " deve possuir no mínimo " +
+        minValue +
+        (minValue == 1 ? " caracter" : " caracteres") +
+        "!";
     }
     // Informou apenas max.
     if (maxValue && !minValue) {
-      message = fieldId + " deve possuir no máximo " + maxValue + (maxValue == 1 ? " caracter" : " caracteres") + "!";
+      message =
+        fieldId +
+        " deve possuir no máximo " +
+        maxValue +
+        (maxValue == 1 ? " caracter" : " caracteres") +
+        "!";
     }
     // Informou min e max.
     if (minValue && maxValue) {
-      message = fieldId + " deve possuir no mínimo " + minValue + (minValue == 1 ? " caracter" : " caracteres") + " e ";
-      message += "no máximo " + maxValue + (maxValue == 1 ? " caracter" : " caracteres") + "!";
+      message =
+        fieldId +
+        " deve possuir no mínimo " +
+        minValue +
+        (minValue == 1 ? " caracter" : " caracteres") +
+        " e ";
+      message +=
+        "no máximo " +
+        maxValue +
+        (maxValue == 1 ? " caracter" : " caracteres") +
+        "!";
     }
   }
   if ($(field).val()) {
@@ -125,9 +160,12 @@ function LengthValidationValue(field, length, message) {
       } else if (maxValue && !minValue) {
         test($(field).val().length <= maxValue, message);
       } else if (minValue && maxValue) {
-        test( ($(field).val().length >= minValue) && ($(field).val().length <= maxValue), message );
+        test(
+          $(field).val().length >= minValue &&
+            $(field).val().length <= maxValue,
+          message
+        );
       } else {
-
       }
       $(field).removeClass("invalid");
       $(fieldLabelId).removeClass("invalid");
@@ -135,7 +173,12 @@ function LengthValidationValue(field, length, message) {
     } catch (error) {
       $(field).addClass("invalid");
       $(fieldLabelId).addClass("invalid");
-      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      var validationMessage =
+        '<span id="' +
+        fieldMessageId +
+        '" class="invalid">&nbsp;' +
+        message +
+        "</span>";
       $(field).after(validationMessage);
       validationResult = new ValidationResult(field, false);
       validationError = new ValidationError(field, error);
@@ -156,7 +199,13 @@ function MinLengthFieldValidation(field, length, message) {
     var fieldId = $(field).attr("id");
     var fieldLabelId = 'label[for="' + fieldId + '"]';
     var fieldMessageId = fieldId + "-error-message";
-    message = message ? message : fieldId + " deve possuir no mínimo " + length + (length == 1 ? " caracter" : " caracteres") + "!";
+    message = message
+      ? message
+      : fieldId +
+        " deve possuir no mínimo " +
+        length +
+        (length == 1 ? " caracter" : " caracteres") +
+        "!";
     if ($(field).val()) {
       $("#" + fieldMessageId).remove();
       try {
@@ -167,7 +216,12 @@ function MinLengthFieldValidation(field, length, message) {
       } catch (error) {
         $(field).addClass("invalid");
         $(fieldLabelId).addClass("invalid");
-        var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+        var validationMessage =
+          '<span id="' +
+          fieldMessageId +
+          '" class="invalid">&nbsp;' +
+          message +
+          "</span>";
         $(field).after(validationMessage);
         validationResult = new ValidationResult(field, false);
         validationError = new ValidationError(field, error);
@@ -189,7 +243,13 @@ function MaxLengthFieldValidation(field, length, message) {
     var fieldId = $(field).attr("id");
     var fieldLabelId = 'label[for="' + fieldId + '"]';
     var fieldMessageId = fieldId + "-error-message";
-    message = message ? message : fieldId + " deve possuir no máximo " + length + (length == 1 ? " caracter" : " caracteres") + "!";
+    message = message
+      ? message
+      : fieldId +
+        " deve possuir no máximo " +
+        length +
+        (length == 1 ? " caracter" : " caracteres") +
+        "!";
     if ($(field).val()) {
       $("#" + fieldMessageId).remove();
       try {
@@ -200,7 +260,12 @@ function MaxLengthFieldValidation(field, length, message) {
       } catch (error) {
         $(field).addClass("invalid");
         $(fieldLabelId).addClass("invalid");
-        var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+        var validationMessage =
+          '<span id="' +
+          fieldMessageId +
+          '" class="invalid">&nbsp;' +
+          message +
+          "</span>";
         $(field).after(validationMessage);
         validationResult = new ValidationResult(field, false);
         validationError = new ValidationError(field, error);
@@ -246,7 +311,7 @@ function PatternFieldValidation(field, pattern, message) {
           fieldMessageId +
           '" class="invalid">&nbsp;' +
           message +
-          '</span>';
+          "</span>";
         $(field).after(validationMessage);
         validationResult = new ValidationResult(field, false);
         validationError = new ValidationError(field, error);
@@ -287,7 +352,7 @@ function FormValidator(settings) {
     for (var i in settings) {
       setting = settings[i] ? settings[i] : null;
       if (setting) {
-        if (i === "form" && typeof(setting) === "string") {
+        if (i === "form" && typeof setting === "string") {
           self.form = "#" + settings["form"];
         } else {
           // TODO - lançar exceção avisando que a propriedade não é uma string.
@@ -305,17 +370,24 @@ function FormValidator(settings) {
                   formFieldRule[j][k] = formFieldValidation;
                   for (var formFieldValidationSetting in formFieldValidation) {
                     if (formFieldValidationSetting === "events") {
-                      if (formFieldValidation["events"] && formFieldValidation["events"] instanceof Array) {
-                        formFieldValidationEvents = formFieldValidation["events"];
+                      if (
+                        formFieldValidation["events"] &&
+                        formFieldValidation["events"] instanceof Array
+                      ) {
+                        formFieldValidationEvents =
+                          formFieldValidation["events"];
                         if (formFieldValidationEvents.length > 0) {
                           var field = j;
-                          var events = ("" + formFieldValidationEvents).replace(/,/g, " ");
+                          var events = ("" + formFieldValidationEvents).replace(
+                            /,/g,
+                            " "
+                          );
                           if (events) {
-                           (function(field, events) {
-                            $(document).on(events, field, function(event) {
-                              self.validate();
-                            });
-                           })("#" + field, "" + events);
+                            (function(field, events) {
+                              $(document).on(events, field, function(event) {
+                                self.validate();
+                              });
+                            })("#" + field, "" + events);
                           }
                         }
                       }
@@ -335,14 +407,21 @@ function FormValidator(settings) {
     throw "A configuração do validador de formulário não foi informada!";
   }
   this.enableSubmitButton = function() {
-    $(self.form).find("input:submit").removeAttr("disabled");
+    $(self.form)
+      .find("input:submit")
+      .removeAttr("disabled");
   };
   this.disableSubmitButton = function() {
-    $(self.form).find("input:submit").attr("disabled", "disabled");
+    $(self.form)
+      .find("input:submit")
+      .attr("disabled", "disabled");
   };
   this.validate = function() {
-    self.form = self.form && typeof(self.form) === "string" ? self.form : null;
-    self.formValidations = self.formValidations && self.formValidations instanceof Object ? self.formValidations : null;
+    self.form = self.form && typeof self.form === "string" ? self.form : null;
+    self.formValidations =
+      self.formValidations && self.formValidations instanceof Object
+        ? self.formValidations
+        : null;
     var formFieldRule = null;
     var formField = null;
     var requiredFieldValidation = null;
@@ -357,64 +436,127 @@ function FormValidator(settings) {
     var $field = null;
     var validationResults = [];
     for (var rule in self.formFieldRules) {
-      formFieldRule = self.formFieldRules[rule] ? self.formFieldRules[rule] : null;
+      formFieldRule = self.formFieldRules[rule]
+        ? self.formFieldRules[rule]
+        : null;
       if (formFieldRule && formFieldRule instanceof Object) {
         for (var field in formFieldRule) {
           formField = field;
           $field = $(self.form + " #" + field);
-          var formFieldValidation = formFieldRule[field] ? formFieldRule[field] : null;
+          var formFieldValidation = formFieldRule[field]
+            ? formFieldRule[field]
+            : null;
           if (formFieldValidation && formFieldValidation instanceof Object) {
             for (var validation in formFieldValidation) {
-              var formFieldValidationSettings = formFieldValidation[validation] ? formFieldValidation[validation] : null;
-              if (formFieldValidationSettings && formFieldValidationSettings instanceof Object) {
+              var formFieldValidationSettings = formFieldValidation[validation]
+                ? formFieldValidation[validation]
+                : null;
+              if (
+                formFieldValidationSettings &&
+                formFieldValidationSettings instanceof Object
+              ) {
                 for (var setting in formFieldValidationSettings) {
-                  var formFieldValidationSetting = formFieldValidationSettings[setting] ? formFieldValidationSettings[setting] : null;
+                  var formFieldValidationSetting = formFieldValidationSettings[
+                    setting
+                  ]
+                    ? formFieldValidationSettings[setting]
+                    : null;
                   var formFieldValidationResult = null;
                   if (formFieldValidationSetting) {
-                    if (setting === "events" && formFieldValidationSetting instanceof Array && formFieldValidationSetting.length > 0) {
+                    if (
+                      setting === "events" &&
+                      formFieldValidationSetting instanceof Array &&
+                      formFieldValidationSetting.length > 0
+                    ) {
                       formFieldValidationEvents = formFieldValidationSetting;
                       for (var event in formFieldValidationEvents) {
-                        formFieldValidationEvent = formFieldValidationEvents[event] ? formFieldValidationEvents[event] : null;
+                        formFieldValidationEvent = formFieldValidationEvents[
+                          event
+                        ]
+                          ? formFieldValidationEvents[event]
+                          : null;
                       }
                     }
                     if (setting === "value") {
                       formFieldValidationValue = formFieldValidationSetting;
                     }
-                    if (setting === "message" && typeof(formFieldValidationSetting) === "string") {
+                    if (
+                      setting === "message" &&
+                      typeof formFieldValidationSetting === "string"
+                    ) {
                       formFieldValidationMessage = formFieldValidationSetting;
                     }
                     if (validation === "required") {
-                      if (formFieldValidationValue && typeof(formFieldValidationValue) === "boolean") {
-                        requiredFieldValidation = new RequiredFieldValidation($field, formFieldValidationMessage);
+                      if (
+                        formFieldValidationValue &&
+                        typeof formFieldValidationValue === "boolean"
+                      ) {
+                        requiredFieldValidation = new RequiredFieldValidation(
+                          $field,
+                          formFieldValidationMessage
+                        );
                         formFieldValidationResult = requiredFieldValidation.result();
                       }
                     }
                     if (validation === "pattern") {
-                      if (formFieldValidationValue && formFieldValidationValue instanceof RegExp) {
-                        patternFieldValidation = new PatternFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
+                      if (
+                        formFieldValidationValue &&
+                        formFieldValidationValue instanceof RegExp
+                      ) {
+                        patternFieldValidation = new PatternFieldValidation(
+                          $field,
+                          formFieldValidationValue,
+                          formFieldValidationMessage
+                        );
                         formFieldValidationResult = patternFieldValidation.result();
                       }
                     }
                     if (validation === "minlength") {
-                      if (formFieldValidationValue && typeof(formFieldValidationValue) === "number") {
-                        minLengthFieldValidation = new MinLengthFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
+                      if (
+                        formFieldValidationValue &&
+                        typeof formFieldValidationValue === "number"
+                      ) {
+                        minLengthFieldValidation = new MinLengthFieldValidation(
+                          $field,
+                          formFieldValidationValue,
+                          formFieldValidationMessage
+                        );
                         formFieldValidationResult = minLengthFieldValidation.result();
                       }
                     }
                     if (validation === "maxlength") {
-                      if (formFieldValidationValue && typeof(formFieldValidationValue) === "number") {
-                        maxLengthFieldValidation = new MaxLengthFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
+                      if (
+                        formFieldValidationValue &&
+                        typeof formFieldValidationValue === "number"
+                      ) {
+                        maxLengthFieldValidation = new MaxLengthFieldValidation(
+                          $field,
+                          formFieldValidationValue,
+                          formFieldValidationMessage
+                        );
                         formFieldValidationResult = maxLengthFieldValidation.result();
                       }
                     }
                     if (validation === "length") {
-                      if (formFieldValidationValue && formFieldValidationValue instanceof Object) {
-                        lengthFieldValidation = new LengthValidationValue($field, formFieldValidationValue, formFieldValidationMessage);
+                      if (
+                        formFieldValidationValue &&
+                        formFieldValidationValue instanceof Object
+                      ) {
+                        lengthFieldValidation = new LengthValidationValue(
+                          $field,
+                          formFieldValidationValue,
+                          formFieldValidationMessage
+                        );
                         formFieldValidationResult = lengthFieldValidation.result();
                       }
                     }
-                    if (formFieldValidationResult && "status" in formFieldValidationResult) {
-                      validationResults.push(formFieldValidationResult["status"]);
+                    if (
+                      formFieldValidationResult &&
+                      "status" in formFieldValidationResult
+                    ) {
+                      validationResults.push(
+                        formFieldValidationResult["status"]
+                      );
                     }
                   }
                 }
@@ -434,6 +576,15 @@ function FormValidator(settings) {
       self.enableSubmitButton();
     } else {
       self.disableSubmitButton();
+    }
+  };
+  this.reset = function() {
+    if (self.form) {
+        $(self.form).find(".invalid").each(function(i, e) {
+            $(e).removeClass("invalid");
+        });
+        $('span[id$="-error-message"]').remove();
+        $(self.form).find("input:submit").removeAttr("disabled");
     }
   };
 }
