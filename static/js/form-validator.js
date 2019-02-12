@@ -24,7 +24,7 @@ function ValidationError(field, message) {
   return error;
 }
 
-ValidationError.prototype.toString = function() {
+ValidationError.prototype.toString = function () {
   return "ValidationError: " + $(this.field).attr("id") + " " + this.message;
 };
 
@@ -68,10 +68,10 @@ function RequiredFieldValidation(field, message) {
       validationError = new ValidationError(field, error);
     }
   }
-  this.error = function() {
+  this.error = function () {
     return validationError;
   };
-  this.result = function() {
+  this.result = function () {
     return validationResult;
   };
 }
@@ -162,7 +162,7 @@ function LengthFieldValidation(field, length, message) {
       } else if (minValue && maxValue) {
         test(
           $(field).val().length >= minValue &&
-            $(field).val().length <= maxValue,
+          $(field).val().length <= maxValue,
           message
         );
       } else {
@@ -184,10 +184,10 @@ function LengthFieldValidation(field, length, message) {
       validationError = new ValidationError(field, error);
     }
   }
-  this.error = function() {
+  this.error = function () {
     return validationError;
   };
-  this.result = function() {
+  this.result = function () {
     return validationResult;
   };
 }
@@ -202,10 +202,10 @@ function MinLengthFieldValidation(field, length, message) {
     message = message
       ? message
       : fieldId +
-        " deve possuir no mínimo " +
-        length +
-        (length == 1 ? " caracter" : " caracteres") +
-        "!";
+      " deve possuir no mínimo " +
+      length +
+      (length == 1 ? " caracter" : " caracteres") +
+      "!";
     if ($(field).val()) {
       $("#" + fieldMessageId).remove();
       try {
@@ -228,10 +228,10 @@ function MinLengthFieldValidation(field, length, message) {
       }
     }
   }
-  this.error = function() {
+  this.error = function () {
     return validationError;
   };
-  this.result = function() {
+  this.result = function () {
     return validationResult;
   };
 }
@@ -246,10 +246,10 @@ function MaxLengthFieldValidation(field, length, message) {
     message = message
       ? message
       : fieldId +
-        " deve possuir no máximo " +
-        length +
-        (length == 1 ? " caracter" : " caracteres") +
-        "!";
+      " deve possuir no máximo " +
+      length +
+      (length == 1 ? " caracter" : " caracteres") +
+      "!";
     if ($(field).val()) {
       $("#" + fieldMessageId).remove();
       try {
@@ -272,10 +272,10 @@ function MaxLengthFieldValidation(field, length, message) {
       }
     }
   }
-  this.error = function() {
+  this.error = function () {
     return validationError;
   };
-  this.result = function() {
+  this.result = function () {
     return validationResult;
   };
 }
@@ -325,10 +325,41 @@ function PatternFieldValidation(field, pattern, message) {
       throw "Nenhum pattern informado!";
     }
   }
-  this.error = function() {
+  this.error = function () {
     return validationError;
   };
-  this.result = function() {
+  this.result = function () {
+    return validationResult;
+  };
+}
+
+function NumberFieldValidation(field, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " é um campo que aceita apenas valores numéricos!";
+    $("#" + fieldMessageId).remove();
+    try {
+      test(/\d+/.test($(field).val()), message);
+      $(field).removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
+      validationResult = new ValidationResult(field, true);
+    } catch (error) {
+      $(field).addClass("invalid");
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      $(field).after(validationMessage);
+      validationResult = new ValidationResult(field, false);
+      validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function () {
+    return validationError;
+  };
+  this.result = function () {
     return validationResult;
   };
 }
@@ -384,8 +415,8 @@ function FormValidator(settings) {
                             " "
                           );
                           if (events) {
-                            (function(field, events) {
-                              $(document).on(events, field, function(event) {
+                            (function (field, events) {
+                              $(document).on(events, field, function (event) {
                                 //self.validate();
                                 self.validateField(field);
                               });
@@ -408,7 +439,7 @@ function FormValidator(settings) {
   } else {
     throw "A configuração do validador de formulário não foi informada!";
   }
-  this.validateField = function(field) {
+  this.validateField = function (field) {
     if (field) {
       var $field = $(field);
       var fieldName = field.replace("#", "");
@@ -422,6 +453,7 @@ function FormValidator(settings) {
         var minLengthFieldValidation = null;
         var maxLengthFieldValidation = null;
         var lengthFieldValidation = null;
+        var numberFieldValidation = null;
         var validationResult = null;
         for (var fieldValidation in fieldValidationSettings) {
           fieldValidationSetting = fieldValidationSettings[fieldValidation];
@@ -447,7 +479,7 @@ function FormValidator(settings) {
             }
           }
           if (fieldValidation === "minlength") {
-            if (typeof(fieldValidationValue) === "number") {
+            if (typeof (fieldValidationValue) === "number") {
               minLengthFieldValidation = new MinLengthFieldValidation(
                 field,
                 fieldValidationValue,
@@ -457,7 +489,7 @@ function FormValidator(settings) {
             }
           }
           if (fieldValidation === "maxlength") {
-            if (typeof(fieldValidationValue) === "number") {
+            if (typeof (fieldValidationValue) === "number") {
               maxLengthFieldValidation = new MaxLengthFieldValidation(
                 field,
                 fieldValidationValue,
@@ -467,9 +499,15 @@ function FormValidator(settings) {
             }
           }
           if (fieldValidation === "length") {
-            if (typeof(fieldValidationValue) === "object") {
+            if (typeof (fieldValidationValue) === "object") {
               lengthFieldValidation = new LengthFieldValidation(field, fieldValidationValue, fieldValidationMessage);
               validationResult = lengthFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "number") {
+            if (fieldValidationValue === true) {
+              numberFieldValidation = new NumberFieldValidation(field, fieldValidationMessage);
+              validationResult = numberFieldValidation.result();
             }
           }
           if (validationResult.status === false) {
@@ -483,17 +521,17 @@ function FormValidator(settings) {
       }
     }
   };
-  this.enableSubmitButton = function() {
+  this.enableSubmitButton = function () {
     $(self.form)
       .find("input:submit")
       .removeAttr("disabled");
   };
-  this.disableSubmitButton = function() {
+  this.disableSubmitButton = function () {
     $(self.form)
       .find("input:submit")
       .attr("disabled", "disabled");
   };
-  this.validate = function() {
+  this.validate = function () {
     self.form = self.form && typeof self.form === "string" ? self.form : null;
     self.formValidations =
       self.formValidations && self.formValidations instanceof Object
@@ -506,6 +544,7 @@ function FormValidator(settings) {
     var minLengthFieldValidation = null;
     var maxLengthFieldValidation = null;
     var lengthFieldValidation = null;
+    var numberFieldValidation = null;
     var formFieldValidationEvents = null;
     var formFieldValidationEvent = null;
     var formFieldValidationValue = null;
@@ -627,6 +666,11 @@ function FormValidator(settings) {
                         formFieldValidationResult = lengthFieldValidation.result();
                       }
                     }
+                    if (validation === "number") {
+                      if (formFieldValidationValue && typeof (formFieldValidationValue) === "number") {
+                        numberFieldValidation = new NumberFieldValidation($field, formFieldValidationMessage);
+                      }
+                    }
                     if (
                       formFieldValidationResult &&
                       "status" in formFieldValidationResult
@@ -655,11 +699,11 @@ function FormValidator(settings) {
       self.disableSubmitButton();
     }
   };
-  this.reset = function() {
+  this.reset = function () {
     if (self.form) {
       $(self.form)
         .find(".invalid")
-        .each(function(i, e) {
+        .each(function (i, e) {
           $(e).removeClass("invalid");
         });
       $('span[id$="-error-message"]').remove();
