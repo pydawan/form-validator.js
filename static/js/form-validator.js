@@ -5,6 +5,9 @@
  * @since v1.0.0
  */
 
+ // TODO - 1. refatorar o código.
+ // TODO - 2. criar novos tipos de validação de campos de formulário.
+
 function test(condition, failMessage) {
   if (!condition) {
     throw failMessage;
@@ -343,7 +346,131 @@ function NumberFieldValidation(field, message) {
     message = message ? message : fieldId + " é um campo que aceita apenas valores numéricos!";
     $("#" + fieldMessageId).remove();
     try {
-      test(/\d+/.test($(field).val()), message);
+      test(/^(\+|-)?\d+$/.test($(field).val()), message);
+      $(field).removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
+      validationResult = new ValidationResult(field, true);
+    } catch (error) {
+      $(field).addClass("invalid");
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      $(field).after(validationMessage);
+      validationResult = new ValidationResult(field, false);
+      validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function () {
+    return validationError;
+  };
+  this.result = function () {
+    return validationResult;
+  };
+}
+
+function NumberFieldValidation(field, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " é um campo que aceita apenas valores numéricos!";
+    $("#" + fieldMessageId).remove();
+    try {
+      test(/^(\+|-)?\d+$/.test($(field).val()), message);
+      $(field).removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
+      validationResult = new ValidationResult(field, true);
+    } catch (error) {
+      $(field).addClass("invalid");
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      $(field).after(validationMessage);
+      validationResult = new ValidationResult(field, false);
+      validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function () {
+    return validationError;
+  };
+  this.result = function () {
+    return validationResult;
+  };
+}
+
+function PositiveNumberFieldValidation(field, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " é um campo que aceita apenas valores numéricos positivos!";
+    $("#" + fieldMessageId).remove();
+    try {
+      test(/^\d+$/.test($(field).val()), message);
+      $(field).removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
+      validationResult = new ValidationResult(field, true);
+    } catch (error) {
+      $(field).addClass("invalid");
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      $(field).after(validationMessage);
+      validationResult = new ValidationResult(field, false);
+      validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function () {
+    return validationError;
+  };
+  this.result = function () {
+    return validationResult;
+  };
+}
+
+function NegativeNumberFieldValidation(field, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " é um campo que aceita apenas valores numéricos negativos!";
+    $("#" + fieldMessageId).remove();
+    try {
+      test(/^-\d+$/.test($(field).val()), message);
+      $(field).removeClass("invalid");
+      $(fieldLabelId).removeClass("invalid");
+      validationResult = new ValidationResult(field, true);
+    } catch (error) {
+      $(field).addClass("invalid");
+      $(fieldLabelId).addClass("invalid");
+      var validationMessage = '<span id="' + fieldMessageId + '" class="invalid">&nbsp;' + message + '</span>';
+      $(field).after(validationMessage);
+      validationResult = new ValidationResult(field, false);
+      validationError = new ValidationError(field, error);
+    }
+  }
+  this.error = function () {
+    return validationError;
+  };
+  this.result = function () {
+    return validationResult;
+  };
+}
+
+function DateFieldValidation(field, format, message) {
+  var validationError = null;
+  var validationResult = null;
+  if (field && (format && format instanceof RegExp)) {
+    var fieldId = $(field).attr("id");
+    var fieldLabelId = 'label[for="' + fieldId + '"]';
+    var fieldMessageId = fieldId + "-error-message";
+    message = message ? message : fieldId + " é um campo que aceita apenas datas no formato" + format + "!";
+    $("#" + fieldMessageId).remove();
+    try {
+      test(format.test($(field).val()), message);
       $(field).removeClass("invalid");
       $(fieldLabelId).removeClass("invalid");
       validationResult = new ValidationResult(field, true);
@@ -454,6 +581,9 @@ function FormValidator(settings) {
         var maxLengthFieldValidation = null;
         var lengthFieldValidation = null;
         var numberFieldValidation = null;
+        var positiveNumberFieldValidation = null;
+        var negativeNumberFieldValidation = null;
+        var dateFieldValidation = null;
         var validationResult = null;
         for (var fieldValidation in fieldValidationSettings) {
           fieldValidationSetting = fieldValidationSettings[fieldValidation];
@@ -510,6 +640,24 @@ function FormValidator(settings) {
               validationResult = numberFieldValidation.result();
             }
           }
+          if (fieldValidation === "positiveNumber") {
+            if (fieldValidationValue === true) {
+              positiveNumberFieldValidation = new PositiveNumberFieldValidation(field, fieldValidationMessage);
+              validationResult = positiveNumberFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "negativeNumber") {
+            if (fieldValidationValue === true) {
+              negativeNumberFieldValidation = new NegativeNumberFieldValidation(field, fieldValidationMessage);
+              validationResult = negativeNumberFieldValidation.result();
+            }
+          }
+          if (fieldValidation === "date") {
+            if (fieldValidationValue instanceof RegExp) {
+              dateFieldValidation = new DateFieldValidation(field, fieldValidationValue, fieldValidationMessage);
+              validationResult = dateFieldValidation.result();
+            }
+          }
           if (validationResult.status === false) {
             self.validForm = false;
             this.disableSubmitButton();
@@ -545,6 +693,9 @@ function FormValidator(settings) {
     var maxLengthFieldValidation = null;
     var lengthFieldValidation = null;
     var numberFieldValidation = null;
+    var positiveNumberFieldValidation = null;
+    var negativeNumberFieldValidation = null;
+    var dateFieldValidation = null;
     var formFieldValidationEvents = null;
     var formFieldValidationEvent = null;
     var formFieldValidationValue = null;
@@ -669,6 +820,21 @@ function FormValidator(settings) {
                     if (validation === "number") {
                       if (formFieldValidationValue && typeof (formFieldValidationValue) === "number") {
                         numberFieldValidation = new NumberFieldValidation($field, formFieldValidationMessage);
+                      }
+                    }
+                    if (validation === "positiveNumber") {
+                      if (formFieldValidationValue && typeof (formFieldValidationValue) === "number") {
+                        positiveNumberFieldValidation = new PositiveNumberFieldValidation($field, formFieldValidationMessage);
+                      }
+                    }
+                    if (validation === "negativeNumber") {
+                      if (formFieldValidationValue && typeof (formFieldValidationValue) === "number") {
+                        negativeNumberFieldValidation = new NegativeNumberFieldValidation($field, formFieldValidationMessage);
+                      }
+                    }
+                    if (validation === "date") {
+                      if (formFieldValidationValue instanceof RegExp) {
+                        dateFieldValidation = new DateFieldValidation($field, formFieldValidationValue, formFieldValidationMessage);
                       }
                     }
                     if (

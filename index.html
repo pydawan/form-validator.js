@@ -41,6 +41,10 @@
             <td><input type="text" id="email" placeholder="thiagoalexandre@gmail.com"></td>
           </tr>
           <tr>
+            <td><label for="dtNascimento">Dt. nascimento:<label></td>
+            <td><input type="text" id="dtNascimento" placeholder="dd/MM/yyyy"></td>
+          </tr>
+          <tr>
             <td></td>
             <td align="left">
               <input type="submit" value="Enviar">
@@ -88,10 +92,10 @@
               events: ["blur"],
               message: "RG é um campo de preenchimento obrigatório!"
             },
-            number: {
+            positiveNumber: {
               value: true,
               events: ["blur", "keyup"],
-              message: "RG é um campo que aceita apenas valores numéricos!"
+              message: "RG é um campo que aceita apenas valores numéricos positivos!"
             }
           },
           email: {
@@ -107,6 +111,18 @@
               },
               events: ["keyup"],
               message: "E-mail deve ter no mínimo 10 e no máximo 30 caracteres!"
+            }
+          },
+          dtNascimento: {
+            required: {
+              value: true,
+              events: ["blur"],
+              message: "Dt. nascimento é um campo de preenchimento obrigatório!"
+            },
+            date: {
+              value: /\d{2}\/\d{2}\/\d{4}/,
+              events: ["blur", "keyup"],
+              message: "Dt. nascimento é um campo que só aceita datas no formato dd/MM/yyyy!"
             }
           }
         }
