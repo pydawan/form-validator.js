@@ -1040,7 +1040,7 @@ function FormValidator(settings) {
         }
       }
     }
-    for (var i in validationResults) {
+    for (var i = 0; i < validationResults.length; i++) {
       self.validForm = validationResults[i];
       if (self.validForm === false) {
         break;
